@@ -1,0 +1,12 @@
+body {
+    background-color: #f6f8fb;
+}
+
+.chat-box {
+    height: 320px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    padding: 0.75rem;
+}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <h2 class="mb-3">Register</h2>
+        <form method="post" novalidate>
+            <div class="mb-3">
+                <label class="form-label" for="full_name">Full Name</label>
+                <input class="form-control" type="text" id="full_name" name="full_name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="email">Email</label>
+                <input class="form-control" type="email" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="password">Password</label>
+                <input class="form-control" type="password" id="password" name="password" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Create Account</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

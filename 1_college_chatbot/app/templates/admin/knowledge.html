@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Knowledge{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Knowledge Base</h1>
+<form method="post" class="card card-body mb-3">
+    <div class="row g-2 mb-2">
+        <div class="col-md-6"><input class="form-control" name="title" placeholder="Title" required></div>
+        <div class="col-md-6"><input class="form-control" name="tags" placeholder="Tags (space-separated)"></div>
+    </div>
+    <div class="row g-2 mb-2">
+        <div class="col-md-8"><textarea class="form-control" name="content" rows="3" placeholder="Content" required></textarea></div>
+        <div class="col-md-4">
+            <select class="form-select" name="category_id">
+                <option value="">No category</option>
+                {% for c in categories %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <button class="btn btn-primary" type="submit">Add Knowledge Item</button>
+</form>
+
+<table class="table table-striped">
+    <thead><tr><th>Title</th><th>Category</th><th>Tags</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for item in items %}
+        <tr>
+            <td>{{ item.title }}</td>
+            <td>{{ item.category.name if item.category else '-' }}</td>
+            <td>{{ item.tags or '-' }}</td>
+            <td>
+                <form method="post" action="{{ url_for('admin.delete_knowledge', item_id=item.id) }}">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="4" class="text-muted">No knowledge items yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Admin Dashboard</h1>
+<div class="row g-3 mb-3">
+    <div class="col-md-4"><div class="card"><div class="card-body"><strong>Users:</strong> {{ stats.users }}</div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><strong>Categories:</strong> {{ stats.categories }}</div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><strong>Knowledge:</strong> {{ stats.knowledge_items }}</div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><strong>Queries:</strong> {{ stats.queries }}</div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><strong>Chat Records:</strong> {{ stats.chat_records }}</div></div></div>
+</div>
+<div class="d-flex gap-2">
+    <a class="btn btn-outline-primary" href="{{ url_for('admin.categories') }}">Manage Categories</a>
+    <a class="btn btn-outline-primary" href="{{ url_for('admin.knowledge') }}">Manage Knowledge Base</a>
+</div>
+{% endblock %}

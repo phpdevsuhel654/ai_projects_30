@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Home | College Chatbot{% endblock %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3 border">
+    <h1 class="display-6">AI-Powered College Enquiry Chatbot</h1>
+    <p class="lead">Step 3 Phase 1 is live: rule-based FAQ matching with query logging.</p>
+    <a class="btn btn-primary" href="{{ url_for('chatbot.chat_page') }}">Open Chat Assistant</a>
+</div>
+{% endblock %}

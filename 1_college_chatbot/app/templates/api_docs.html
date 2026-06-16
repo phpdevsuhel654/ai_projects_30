@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}API Documentation{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">API Documentation</h1>
+<p class="text-muted">Minimal API reference for learning and testing.</p>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h2 class="h5">POST /api/chat</h2>
+        <p class="mb-2">Chat endpoint for student queries.</p>
+        <pre class="bg-light p-3 rounded mb-2">{
+  "message": "Tell me about hostel",
+  "session_id": "web-session"
+}</pre>
+        <p class="mb-0"><strong>Response:</strong> <code>response</code>, <code>source</code>, <code>intent</code>, <code>entities</code>, <code>confidence</code></p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="h5">OpenAPI JSON</h2>
+        <p class="mb-0">Available at <a href="{{ url_for('main.api_openapi') }}">{{ url_for('main.api_openapi') }}</a></p>
+    </div>
+</div>
+{% endblock %}

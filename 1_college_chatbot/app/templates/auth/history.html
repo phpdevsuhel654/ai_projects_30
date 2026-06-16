@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Chat History{% endblock %}
+
+{% block content %}
+<h2 class="h4 mb-3">My Chat History</h2>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>User Message</th>
+                    <th>Bot Response</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in history %}
+                <tr>
+                    <td>{{ item.user_message }}</td>
+                    <td>{{ item.bot_response }}</td>
+                    <td>{{ item.response_source }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-muted">No chat history yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
