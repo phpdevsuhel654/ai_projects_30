@@ -1,0 +1,21 @@
+#######################################
+@@@ Definition: 
+1. AI Chatbot for College Enquiry System
+This project involves creating a chatbot that answers student queries related to admissions, courses, fees, and facilities. It uses Natural Language Processing (NLP) to understand user queries and respond intelligently.
+Applications: Education websites, help desks, customer support.
+#######################################
+@@@ Main Prompt:
+
+I want to create a following application step by step, 
+AI Chatbot for College Enquiry System This project involves creating a chatbot that answers student queries related to admissions, courses, fees, and facilities. It uses Natural Language Processing (NLP) to understand user queries and respond intelligently. 
+Applications: Education websites, help desks, customer support. 
+•	Creating this application for learning purpose
+•	For the above application use python as scripting language and sqlite as database
+•	Use Flask as python framework
+•	User login required
+•	Use clear architecture for this application
+•	This application will use best free APIs
+•	Use the minimum token
+•	User the following folder as project folder, ai_projects_30\1_college_chatbot
+•	Use minimum token for this application
+#######################################
