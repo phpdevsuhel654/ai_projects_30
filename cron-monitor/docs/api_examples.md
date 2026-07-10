@@ -1,0 +1,126 @@
+# API Testing Examples
+
+## Create Cron Job
+
+```bash
+curl -X POST http://localhost:5000/api/cron \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Archive Return Order Logs",
+    "url": "https://web7.omnirps.com/cron/cron_delete_and_archive_log_table_data/return_order",
+    "execution_count": 5,
+    "schedule_type": "daily",
+    "is_active": true,
+    "description": "Archives return_order logs"
+  }'
+```
+
+## Create Custom-Scheduled Cron Job
+
+```bash
+curl -X POST http://localhost:5000/api/cron \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Every 15 Minutes",
+    "url": "https://example.com/cron",
+    "execution_count": 1,
+    "schedule_type": "custom",
+    "schedule_expression": "*/15 * * * *",
+    "is_active": true
+  }'
+```
+
+## List Cron Jobs
+
+```bash
+curl http://localhost:5000/api/cron
+```
+
+## Run Single Cron Job
+
+```bash
+curl -X POST http://localhost:5000/api/run/1
+```
+
+## Update Cron Job Schedule
+
+```bash
+curl -X PUT http://localhost:5000/api/cron/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schedule_type": "hourly",
+    "schedule_expression": null
+  }'
+```
+
+## Run All Active Cron Jobs
+
+```bash
+curl -X POST http://localhost:5000/api/run-all
+```
+
+## Execution History
+
+```bash
+curl http://localhost:5000/api/history?limit=50
+```
+
+## Dashboard
+
+```bash
+curl http://localhost:5000/api/dashboard
+```
+
+## Report
+
+```bash
+curl http://localhost:5000/api/report?period=daily
+curl http://localhost:5000/api/report?period=weekly
+curl http://localhost:5000/api/report?period=monthly
+```
+
+## Report Trend
+
+```bash
+curl "http://localhost:5000/api/report/trend?days=14"
+curl "http://localhost:5000/api/report/trend?days=14&cron_job_id=1"
+```
+
+## Report Errors Summary
+
+```bash
+curl "http://localhost:5000/api/report/errors?period=weekly&limit=10"
+curl "http://localhost:5000/api/report/errors?period=weekly&cron_job_id=1&limit=5"
+```
+
+## Report CSV Export
+
+```bash
+curl -L "http://localhost:5000/api/report/export?period=daily" -o cron_report_daily.csv
+```
+
+## Web UI Pages
+
+Open in browser:
+
+```text
+http://localhost:5000/dashboard
+http://localhost:5000/cron-jobs
+http://localhost:5000/history
+http://localhost:5000/reports
+```
+
+## API Auth Header Examples (when enabled)
+
+```bash
+curl http://localhost:5000/api/cron -H "X-API-Key: your_api_key"
+curl http://localhost:5000/api/cron -H "Authorization: Bearer your_api_key"
+```
+
+## Web Login (when enabled)
+
+```text
+GET  http://localhost:5000/login
+POST http://localhost:5000/login
+POST http://localhost:5000/logout
+```

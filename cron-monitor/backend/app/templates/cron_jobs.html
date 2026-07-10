@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Cron Jobs | Cron Monitor{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h1 class="h5 fw-bold mb-3">{% if form_mode == 'edit' %}Edit Cron Job{% else %}Add Cron Job{% endif %}</h1>
+        <form method="post" action="{{ url_for('web.cron_jobs_page') }}" class="row g-3">
+          <input type="hidden" name="form_mode" value="{{ form_mode }}" />
+          <input type="hidden" name="cron_id" value="{{ edit_job.id if edit_job else '' }}" />
+          <div class="col-12">
+            <label class="form-label">Name</label>
+            <input class="form-control" name="name" value="{{ edit_job.name if edit_job else '' }}" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label">URL</label>
+            <input class="form-control" name="url" placeholder="https://..." value="{{ edit_job.url if edit_job else '' }}" required />
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Execution Count</label>
+            <input class="form-control" type="number" min="1" name="execution_count" value="{{ edit_job.execution_count if edit_job else 1 }}" required />
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Schedule Type</label>
+            <select class="form-select" name="schedule_type">
+              <option value="hourly" {% if edit_job and edit_job.schedule_type == 'hourly' %}selected{% endif %}>Hourly</option>
+              <option value="daily" {% if not edit_job or edit_job.schedule_type == 'daily' %}selected{% endif %}>Daily</option>
+              <option value="custom" {% if edit_job and edit_job.schedule_type == 'custom' %}selected{% endif %}>Custom</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Schedule Expression (custom only)</label>
+            <input class="form-control" name="schedule_expression" placeholder="*/15 * * * *" value="{{ edit_job.schedule_expression if edit_job and edit_job.schedule_expression else '' }}" />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="3" name="description">{{ edit_job.description if edit_job and edit_job.description else '' }}</textarea>
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {% if not edit_job or edit_job.is_active %}checked{% endif %} />
+              <label class="form-check-label" for="isActive">Active</label>
+            </div>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100">{% if form_mode == 'edit' %}Update Cron Job{% else %}Create Cron Job{% endif %}</button>
+          </div>
+          {% if form_mode == 'edit' %}
+            <div class="col-12">
+              <a href="{{ url_for('web.cron_jobs_page') }}" class="btn btn-outline-dark w-100">Cancel Edit</a>
+            </div>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Cron Jobs</h2>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Schedule</th>
+                <th>Exec Count</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if jobs %}
+                {% for job in jobs %}
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">{{ job.name }}</div>
+                      <div class="small text-muted text-break">{{ job.url }}</div>
+                    </td>
+                    <td>
+                      {{ job.schedule_type }}
+                      {% if job.schedule_expression %}
+                        <div class="small text-muted">{{ job.schedule_expression }}</div>
+                      {% endif %}
+                    </td>
+                    <td>{{ job.execution_count }}</td>
+                    <td>
+                      {% if job.is_active %}
+                        <span class="badge text-bg-success">Active</span>
+                      {% else %}
+                        <span class="badge text-bg-secondary">Disabled</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="d-flex flex-wrap gap-2">
+                        <form method="post" action="{{ url_for('web.cron_job_run', cron_id=job.id) }}">
+                          <button class="btn btn-sm btn-outline-primary" type="submit">Run</button>
+                        </form>
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('web.cron_jobs_page', edit_id=job.id) }}">Edit</a>
+                        <form method="post" action="{{ url_for('web.cron_job_toggle', cron_id=job.id) }}">
+                          <button class="btn btn-sm btn-outline-dark" type="submit">
+                            {% if job.is_active %}Disable{% else %}Enable{% endif %}
+                          </button>
+                        </form>
+                        <form method="post" action="{{ url_for('web.cron_job_delete', cron_id=job.id) }}" onsubmit="return confirm('Delete this cron job?');">
+                          <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-4">No cron jobs added yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

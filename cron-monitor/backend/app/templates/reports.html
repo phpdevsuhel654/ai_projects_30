@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Reports | Cron Monitor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+  <div>
+    <h1 class="h4 fw-bold mb-1 text-capitalize">{{ period }} Report</h1>
+    <p class="text-muted mb-0">Aggregated run statistics, trends, and top errors.</p>
+  </div>
+  <a
+    class="btn btn-outline-primary"
+    href="{{ url_for('execution.report_export', period=period, cron_job_id=selected_cron_job_id, start_at=selected_start_at, end_at=selected_end_at) }}"
+  >
+    Export CSV
+  </a>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-12 col-md-2">
+        <label for="period" class="form-label">Period</label>
+        <select id="period" name="period" class="form-select">
+          <option value="daily" {% if period == 'daily' %}selected{% endif %}>Daily</option>
+          <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>Weekly</option>
+          <option value="monthly" {% if period == 'monthly' %}selected{% endif %}>Monthly</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-3">
+        <label for="cron_job_id" class="form-label">Cron Job</label>
+        <select id="cron_job_id" name="cron_job_id" class="form-select">
+          <option value="">All Jobs</option>
+          {% for job in jobs %}
+            <option value="{{ job.id }}" {% if selected_cron_job_id == job.id %}selected{% endif %}>
+              {{ job.name }} (#{{ job.id }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-2">
+        <label for="start_at" class="form-label">Start</label>
+        <input id="start_at" name="start_at" type="datetime-local" class="form-control" value="{{ selected_start_at_local or '' }}" />
+      </div>
+      <div class="col-12 col-md-2">
+        <label for="end_at" class="form-label">End</label>
+        <input id="end_at" name="end_at" type="datetime-local" class="form-control" value="{{ selected_end_at_local or '' }}" />
+      </div>
+      <div class="col-12 col-md-2">
+        <label for="trend_days" class="form-label">Trend Days</label>
+        <input id="trend_days" name="trend_days" class="form-control" type="number" min="1" max="90" value="{{ trend_days }}" />
+      </div>
+      <div class="col-12 col-md-1 d-grid">
+        <button class="btn btn-primary" type="submit">Apply</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-12 col-md-3">
+        <div class="small text-muted">From</div>
+        <div>{{ report['from'] }}</div>
+      </div>
+      <div class="col-12 col-md-3">
+        <div class="small text-muted">To</div>
+        <div>{{ report['to'] }}</div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="small text-muted">Runs</div>
+        <div class="fw-bold">{{ report['totals']['run_count'] }}</div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="small text-muted">Success %</div>
+        <div class="fw-bold">{{ "%.2f"|format(report['totals']['success_percentage']) }}%</div>
+      </div>
+      <div class="col-12 col-md-2">
+        <div class="small text-muted">Avg Time</div>
+        <div class="fw-bold">{{ "%.3f"|format(report['totals']['avg_response_time']) }}s</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <h2 class="h6 fw-bold mb-3">Per-URL Summary</h2>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Job ID</th>
+            <th>Name</th>
+            <th>Run Count</th>
+            <th>Success</th>
+            <th>Failure</th>
+            <th>Avg Response Time</th>
+          </tr>
+        </thead>
+        <tbody>
+              {% if report['items'] %}
+                {% for item in report['items'] %}
+              <tr>
+                <td>{{ item.cron_job_id }}</td>
+                <td>
+                  <div class="fw-semibold">{{ item.name }}</div>
+                  <div class="small text-muted text-break">{{ item.url }}</div>
+                </td>
+                <td>{{ item.run_count }}</td>
+                <td>{{ item.success_count }}</td>
+                <td>{{ item.failure_count }}</td>
+                <td>{{ "%.3f"|format(item.avg_response_time or 0) }}s</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">No report data available for selected period.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-12 col-xl-7">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h2 class="h6 fw-bold mb-3">Trend (Last {{ trend['days'] }} Day{{ 's' if trend['days'] != 1 else '' }})</h2>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Runs</th>
+                <th>Success</th>
+                <th>Failure</th>
+                <th>Success %</th>
+                <th>Avg Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if trend['items'] %}
+                {% for item in trend['items'] %}
+                  <tr>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.run_count }}</td>
+                    <td>{{ item.success_count }}</td>
+                    <td>{{ item.failure_count }}</td>
+                    <td>{{ "%.2f"|format(item.success_percentage) }}%</td>
+                    <td>{{ "%.3f"|format(item.avg_response_time or 0) }}s</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">No trend data available.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-5">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h2 class="h6 fw-bold mb-3">Top Errors</h2>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Error</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if errors['items'] %}
+                {% for item in errors['items'] %}
+                  <tr>
+                    <td class="small text-break">{{ item.error_message }}</td>
+                    <td>{{ item.occurrences }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="2" class="text-center text-muted py-4">No failure data for selected filters.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
