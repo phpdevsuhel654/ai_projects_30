@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="card-title">Spam Email Detector</h1>
+        <p class="card-text">This starter app is ready for Phase 1 development.</p>
+        <ul>
+          <li>Flask app created</li>
+          <li>Home route working</li>
+          <li>Template structure in place</li>
+        </ul>
+        <div class="mt-3">
+          <a class="btn btn-primary me-2" href="/predict">Try Prediction</a>
+          <a class="btn btn-outline-secondary" href="/history">View History</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

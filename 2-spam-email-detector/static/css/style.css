@@ -1,0 +1,26 @@
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    min-height: 100vh;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+}
+
+.btn-primary {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.btn-outline-secondary {
+    border-radius: 999px;
+}
+
+.form-control, .form-select {
+    border-radius: 0.75rem;
+}
+
+.table thead {
+    background-color: #f8fafc;
+}
