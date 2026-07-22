@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UtilityHub</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --uh-black: #0d0d0d;
+      --uh-white: #ffffff;
+      --uh-gray-50:  #f9f9f9;
+      --uh-gray-100: #f2f2f2;
+      --uh-gray-200: #e5e5e5;
+      --uh-gray-400: #a0a0a0;
+      --uh-gray-600: #6b6b6b;
+    }
+    body {
+      background: var(--uh-gray-50);
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--uh-black);
+    }
+    /* ── Navbar ─────────────────────────────────────────────── */
+    .uh-navbar {
+      background: var(--uh-black);
+      border-bottom: 1px solid #222;
+    }
+    .uh-brand {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--uh-white) !important;
+      text-decoration: none;
+    }
+    .uh-brand span {
+      color: var(--uh-gray-400);
+      font-weight: 400;
+    }
+    .uh-nav-link {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--uh-gray-400) !important;
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .uh-nav-link:hover,
+    .uh-nav-link.active {
+      color: var(--uh-white) !important;
+      background: rgba(255,255,255,0.1);
+    }
+    .uh-nav-link.active {
+      background: rgba(255,255,255,0.15);
+    }
+    /* ── Cards / Panels ─────────────────────────────────────── */
+    .panel {
+      background: var(--uh-white);
+      border: 1px solid var(--uh-gray-200);
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .panel .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--uh-gray-600);
+      margin-bottom: 1rem;
+    }
+    /* ── Stat cards ─────────────────────────────────────────── */
+    .stat-card {
+      border: 1px solid var(--uh-gray-200);
+      border-radius: 10px;
+      background: var(--uh-white);
+      padding: 1.25rem 1.5rem;
+    }
+    .stat-card .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--uh-gray-400);
+    }
+    .stat-card .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--uh-black);
+    }
+    .stat-card .stat-icon {
+      font-size: 1.5rem;
+      color: var(--uh-gray-200);
+    }
+    /* ── Buttons ────────────────────────────────────────────── */
+    .btn-uh-primary {
+      --bs-btn-color: var(--uh-white);
+      --bs-btn-bg: var(--uh-black);
+      --bs-btn-border-color: var(--uh-black);
+      --bs-btn-hover-color: var(--uh-white);
+      --bs-btn-hover-bg: #2a2a2a;
+      --bs-btn-hover-border-color: #2a2a2a;
+      --bs-btn-active-color: var(--uh-white);
+      --bs-btn-active-bg: #1a1a1a;
+      --bs-btn-active-border-color: #1a1a1a;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: 7px;
+      padding: 0.45rem 1.1rem;
+    }
+    .btn-uh-outline {
+      --bs-btn-color: var(--uh-black);
+      --bs-btn-bg: transparent;
+      --bs-btn-border-color: var(--uh-gray-200);
+      --bs-btn-hover-color: var(--uh-black);
+      --bs-btn-hover-bg: var(--uh-gray-100);
+      --bs-btn-hover-border-color: var(--uh-black);
+      --bs-btn-active-color: var(--uh-black);
+      --bs-btn-active-bg: var(--uh-gray-100);
+      --bs-btn-active-border-color: var(--uh-black);
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: 7px;
+      padding: 0.45rem 1.1rem;
+    }
+    .btn-uh-danger {
+      --bs-btn-color: #c0392b;
+      --bs-btn-bg: transparent;
+      --bs-btn-border-color: #e8c2bf;
+      --bs-btn-hover-color: #c0392b;
+      --bs-btn-hover-bg: #fdf0ef;
+      --bs-btn-hover-border-color: #e8c2bf;
+      --bs-btn-active-color: #c0392b;
+      --bs-btn-active-bg: #fdf0ef;
+      --bs-btn-active-border-color: #e8c2bf;
+      font-size: 0.82rem;
+      font-weight: 500;
+      border-radius: 7px;
+      padding: 0.4rem 0.9rem;
+    }
+    /* ── Status badges ──────────────────────────────────────── */
+    .badge-up, .badge-valid {
+      background: #e8f5e9; color: #1b5e20;
+      border: 1px solid #c8e6c9;
+    }
+    .badge-down, .badge-error {
+      background: #ffebee; color: #b71c1c;
+      border: 1px solid #ffcdd2;
+    }
+    .badge-partial, .badge-invalid {
+      background: #fff8e1; color: #7a5000;
+      border: 1px solid #ffe082;
+    }
+    .badge-unknown, .badge-secondary {
+      background: var(--uh-gray-100); color: var(--uh-gray-600);
+      border: 1px solid var(--uh-gray-200);
+    }
+    .uh-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      text-transform: uppercase;
+    }
+    /* ── Tables ─────────────────────────────────────────────── */
+    .uh-table {
+      font-size: 0.85rem;
+    }
+    .uh-table thead th {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--uh-gray-600);
+      border-bottom: 2px solid var(--uh-gray-200);
+      padding: 0.6rem 0.75rem;
+      background: var(--uh-gray-50);
+    }
+    .uh-table tbody td {
+      padding: 0.7rem 0.75rem;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--uh-gray-100);
+    }
+    .uh-table tbody tr:last-child td { border-bottom: 0; }
+    .uh-table tbody tr:hover td { background: var(--uh-gray-50); }
+    /* ── Forms ──────────────────────────────────────────────── */
+    .form-control, .form-select {
+      border-color: var(--uh-gray-200);
+      border-radius: 7px;
+      font-size: 0.875rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--uh-black);
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+    }
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--uh-gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+    /* ── Page header ────────────────────────────────────────── */
+    .page-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .page-subtitle {
+      font-size: 0.85rem;
+      color: var(--uh-gray-400);
+    }
+    /* ── Alert ──────────────────────────────────────────────── */
+    .alert {
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    /* ── Footer ─────────────────────────────────────────────── */
+    .uh-footer {
+      border-top: 1px solid var(--uh-gray-200);
+      background: var(--uh-white);
+      font-size: 0.78rem;
+      color: var(--uh-gray-400);
+      padding: 1rem 0;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="uh-navbar navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a href="/" class="uh-brand">Utility<span>Hub</span></a>
+      <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#uh-nav">
+        <i class="bi bi-list text-white"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="uh-nav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+          <li class="nav-item">
+            <a class="uh-nav-link {% if request.path.startswith('/address') %}active{% endif %}"
+               href="/address-validation">
+              <i class="bi bi-geo-alt me-1"></i>Address Validation
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="uh-nav-link {% if request.path.startswith('/url') %}active{% endif %}"
+               href="/url-monitoring">
+              <i class="bi bi-activity me-1"></i>URL Monitoring
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="uh-nav-link {% if request.path.startswith('/backup') %}active{% endif %}"
+               href="/backup">
+              <i class="bi bi-database-down me-1"></i>Database Backup
+            </a>
+          </li>
+          <li class="nav-item ms-lg-2">
+            <a class="uh-nav-link" href="/health" target="_blank">
+              <i class="bi bi-heart-pulse me-1"></i>Health
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container pb-5">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="uh-footer">
+    <div class="container d-flex justify-content-between">
+      <span><strong>UtilityHub</strong> &mdash; Infrastructure Utility Suite</span>
+      <span><a href="/health" class="text-decoration-none text-secondary">API Health</a></span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+I want to create an application step-by-step in python that have the following requirement,
+
+- Feature 1:
+	- Every day for label creation I am checking for correct address, if customer provide incorrect address.
+	- Following is the address sample that customer provides,
+		"Address": {
+            "BuildingName": "Green Side 5",
+            "StreetAddress": "400 Avenue Roumanille",
+            "Suburb": "Biot",
+            "City": "Biot",
+            "PostCode": "06410",
+            "CountryCode": "FR"
+        }
+	- I will provide the above address json and you need to check address details and provide me the correct address in the above json format.
+	- Use free API for address, if possible.
+- Feature 2:
+	- Every month 4th Sunday, we are doing patching on all server.
+	- At that time, I am checking each and every server URL manually from my end.
+	- So, I want to create a module for that and I can add URLs list.
+	- On one click, system will check all URLs and provide me report with listing execution detail.
+	- Example URL,
+		- https://web4.omniparcelreturns.com
+		- https://web4.omnirps.com
+	
+	The system will do the following things
+		- Use python and flask for the same.
+		- Use sqlite as database.
+		- Use best architechture
+		- Use python\monitor-system folder as root folder
+		- Use minimal tokens

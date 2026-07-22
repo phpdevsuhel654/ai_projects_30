@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{# ── Page header ───────────────────────────────────────── #}
+<div class="mb-4">
+  <h1 class="page-title mb-1"><i class="bi bi-geo-alt me-2 text-secondary"></i>Address Validation</h1>
+  <p class="page-subtitle mb-0">Validate and correct postal addresses via the Nominatim geocoding provider.</p>
+</div>
+
+<div class="row g-4">
+
+  {# Left: form + result #}
+  <div class="col-lg-5">
+    <div class="card panel">
+      <div class="card-body p-4">
+        <p class="card-title"><i class="bi bi-send me-1"></i>Validate Address</p>
+        <form method="post" action="/address-validation">
+          <div class="mb-3">
+            <label class="form-label">Address JSON</label>
+            <textarea class="form-control font-monospace" name="address_json" rows="13" required
+              style="font-size:0.82rem;resize:vertical"
+              placeholder='{
+  "BuildingName": "Green Side 5",
+  "StreetAddress": "400 Avenue Roumanille",
+  "Suburb": "Biot",
+  "City": "Biot",
+  "PostCode": "06410",
+  "CountryCode": "FR"
+}'>{{ address_json_input }}</textarea>
+            <div class="form-text" style="font-size:0.76rem">
+              Required fields: <code>StreetAddress</code>, <code>City</code>, <code>CountryCode</code>
+            </div>
+          </div>
+          <button type="submit" class="btn-uh-primary btn w-100">
+            <i class="bi bi-search me-1"></i>Validate Address
+          </button>
+        </form>
+
+        {% if error %}
+          <div class="alert alert-danger d-flex align-items-center gap-2 mt-3 mb-0">
+            <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+            <div>{{ error }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if result %}
+    <div class="card panel mt-4">
+      <div class="card-body p-4">
+        <p class="card-title"><i class="bi bi-check2-circle me-1"></i>Validation Result</p>
+        <div class="d-flex gap-3 mb-3 flex-wrap">
+          <div>
+            <div class="form-label mb-1">Status</div>
+            {% set vs = result.validation_status | upper %}
+            {% if vs == 'VALID' %}
+              <span class="uh-badge badge-up"><i class="bi bi-check-circle me-1"></i>{{ result.validation_status }}</span>
+            {% elif vs == 'PARTIAL' %}
+              <span class="uh-badge badge-partial"><i class="bi bi-exclamation-circle me-1"></i>{{ result.validation_status }}</span>
+            {% elif vs in ('INVALID', 'ERROR') %}
+              <span class="uh-badge badge-down"><i class="bi bi-x-circle me-1"></i>{{ result.validation_status }}</span>
+            {% else %}
+              <span class="uh-badge badge-unknown">{{ result.validation_status }}</span>
+            {% endif %}
+          </div>
+          <div>
+            <div class="form-label mb-1">Confidence</div>
+            <span class="fw-semibold">{{ "%.0f"|format(result.confidence_score * 100) }}%</span>
+          </div>
+          <div>
+            <div class="form-label mb-1">Validated At</div>
+            <span class="small text-secondary">{{ result.validation_timestamp }}</span>
+          </div>
+        </div>
+        <hr class="my-3" style="border-color:var(--uh-gray-100)">
+        <div class="form-label mb-2"><i class="bi bi-arrow-right-circle me-1"></i>Corrected Address</div>
+        <pre class="p-3 rounded small mb-0"
+             style="background:var(--uh-gray-50);border:1px solid var(--uh-gray-200);font-size:0.8rem;line-height:1.6">{{ corrected_json_output }}</pre>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# Right: validation history #}
+  <div class="col-lg-7">
+    <div class="card panel">
+      <div class="card-body p-4">
+        <p class="card-title"><i class="bi bi-clock-history me-1"></i>Validation History</p>
+        {% if history %}
+          <div class="table-responsive">
+            <table class="uh-table table table-borderless mb-0">
+              <thead>
+                <tr>
+                  <th style="width:6%">#</th>
+                  <th style="width:16%">Status</th>
+                  <th class="text-center" style="width:12%">Confidence</th>
+                  <th style="width:30%">Original</th>
+                  <th style="width:30%">Corrected</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in history %}
+                <tr>
+                  <td class="text-secondary small">{{ item.id }}</td>
+                  <td>
+                    {% set vs = item.validation_status | upper %}
+                    {% if vs == 'VALID' %}
+                      <span class="uh-badge badge-up">{{ item.validation_status }}</span>
+                    {% elif vs == 'PARTIAL' %}
+                      <span class="uh-badge badge-partial">{{ item.validation_status }}</span>
+                    {% elif vs in ('INVALID', 'ERROR') %}
+                      <span class="uh-badge badge-down">{{ item.validation_status }}</span>
+                    {% else %}
+                      <span class="uh-badge badge-unknown">{{ item.validation_status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center small fw-medium">
+                    {{ "%.0f"|format(item.confidence_score * 100) }}%
+                  </td>
+                  <td class="small text-truncate" style="max-width:180px"
+                      title="{{ item.original_address.StreetAddress }}, {{ item.original_address.City }}">
+                    {{ item.original_address.StreetAddress }}, {{ item.original_address.City }}
+                  </td>
+                  <td class="small text-truncate" style="max-width:180px"
+                      title="{{ item.corrected_address.StreetAddress }}, {{ item.corrected_address.City }}">
+                    {{ item.corrected_address.StreetAddress }}, {{ item.corrected_address.City }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-geo-alt" style="font-size:2.5rem;opacity:0.2"></i>
+            <p class="mt-2 mb-0 small">No validation history yet. Submit an address to get started.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

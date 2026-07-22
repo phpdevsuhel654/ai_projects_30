@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{# ── Page header ───────────────────────────────────────── #}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+  <div>
+    <h1 class="page-title mb-1"><i class="bi bi-activity me-2 text-secondary"></i>URL Monitoring</h1>
+    <p class="page-subtitle mb-0">Manage monitored endpoints, run health checks, and review results.</p>
+  </div>
+  <form method="post" action="/url-monitoring/execute">
+    <input type="hidden" name="initiated_by" value="web-ui">
+    <button type="submit" class="btn-uh-primary btn d-flex align-items-center gap-2">
+      <i class="bi bi-play-circle-fill"></i> Run Health Checks
+    </button>
+  </form>
+</div>
+
+{# ── Flash messages ───────────────────────────────────── #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} d-flex align-items-center gap-2 mb-3" role="alert">
+        {% if category == 'success' %}<i class="bi bi-check-circle-fill text-success"></i>
+        {% else %}<i class="bi bi-exclamation-triangle-fill text-danger"></i>{% endif %}
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+{# ── Stat cards ───────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card d-flex justify-content-between align-items-start">
+      <div>
+        <div class="stat-label mb-1">Total URLs</div>
+        <div class="stat-value">{{ cards.total_urls }}</div>
+      </div>
+      <i class="bi bi-link-45deg stat-icon"></i>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card d-flex justify-content-between align-items-start">
+      <div>
+        <div class="stat-label mb-1">Active</div>
+        <div class="stat-value">{{ cards.active_urls }}</div>
+      </div>
+      <i class="bi bi-toggle-on stat-icon"></i>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card d-flex justify-content-between align-items-start">
+      <div>
+        <div class="stat-label mb-1">Failed</div>
+        <div class="stat-value {% if cards.failed_urls > 0 %}text-danger{% endif %}">{{ cards.failed_urls }}</div>
+      </div>
+      <i class="bi bi-exclamation-circle stat-icon {% if cards.failed_urls > 0 %}text-danger{% endif %}" style="opacity:0.5"></i>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card d-flex justify-content-between align-items-start">
+      <div>
+        <div class="stat-label mb-1">Last Run</div>
+        <div class="fs-6 fw-semibold mt-1" style="font-size:0.85rem!important">
+          {{ cards.last_execution_time or '—' }}
+        </div>
+      </div>
+      <i class="bi bi-clock-history stat-icon"></i>
+    </div>
+  </div>
+</div>
+
+{# ── Main layout: left sidebar + right content ─────────── #}
+<div class="row g-4">
+
+  {# Left column: Add URL + Scheduler #}
+  <div class="col-lg-4">
+
+    {# Add URL form #}
+    <div class="card panel mb-4">
+      <div class="card-body p-4">
+        <p class="card-title"><i class="bi bi-plus-circle me-1"></i>Add URL</p>
+        <form method="post" action="/url-monitoring/add">
+          <div class="mb-3">
+            <label class="form-label">URL</label>
+            <input type="url" name="url" class="form-control" placeholder="https://example.com" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes <span class="fw-normal text-secondary" style="text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input type="text" name="notes" class="form-control" placeholder="Brief description">
+          </div>
+          <div class="mb-3 d-flex align-items-center gap-2">
+            <input class="form-check-input mt-0" type="checkbox" name="is_active" id="is_active" checked>
+            <label class="form-check-label small fw-medium" for="is_active">Active immediately</label>
+          </div>
+          <button type="submit" class="btn-uh-primary btn w-100">
+            <i class="bi bi-plus me-1"></i>Add URL
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {# Scheduler status #}
+    <div class="card panel">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <p class="card-title mb-0"><i class="bi bi-calendar-event me-1"></i>Scheduler</p>
+          {% if scheduler_status.configured %}
+            <span class="uh-badge badge-up">Configured</span>
+          {% else %}
+            <span class="uh-badge badge-unknown">Disabled</span>
+          {% endif %}
+        </div>
+        <dl class="row small mb-0" style="row-gap:0.35rem">
+          <dt class="col-5 text-secondary fw-normal">Running</dt>
+          <dd class="col-7 mb-0 fw-medium">{{ 'Yes' if scheduler_status.running else 'No' }}</dd>
+          <dt class="col-5 text-secondary fw-normal">Cron</dt>
+          <dd class="col-7 mb-0 fw-medium"><code class="text-dark bg-transparent">{{ scheduler_status.cron or '—' }}</code></dd>
+          <dt class="col-5 text-secondary fw-normal">Timezone</dt>
+          <dd class="col-7 mb-0 fw-medium">{{ scheduler_status.timezone or '—' }}</dd>
+          <dt class="col-5 text-secondary fw-normal">Next Run</dt>
+          <dd class="col-7 mb-0 fw-medium">{{ scheduler_status.next_run_time or '—' }}</dd>
+        </dl>
+        {% if scheduler_status.last_error %}
+          <div class="alert alert-warning mt-3 mb-0 small py-2 px-3">
+            <i class="bi bi-exclamation-triangle me-1"></i>{{ scheduler_status.last_error }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>{# /left col #}
+
+  {# Right column: URL list + execution results #}
+  <div class="col-lg-8">
+
+    {# URL Management table #}
+    <div class="card panel mb-4">
+      <div class="card-body p-4">
+        <p class="card-title"><i class="bi bi-link-45deg me-1"></i>Monitored URLs</p>
+
+        {% if urls %}
+        <div class="table-responsive">
+          <table class="uh-table table table-borderless mb-0">
+            <thead>
+              <tr>
+                <th style="width:40%">URL</th>
+                <th style="width:25%">Notes</th>
+                <th class="text-center" style="width:10%">Active</th>
+                <th class="text-end" style="width:25%">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in urls %}
+              <tr>
+                <form method="post" action="/url-monitoring/{{ row.id }}/update">
+                  <td>
+                    <input type="url" name="url" class="form-control form-control-sm"
+                           value="{{ row.url }}" required style="min-width:180px">
+                  </td>
+                  <td>
+                    <input type="text" name="notes" class="form-control form-control-sm"
+                           value="{{ row.notes or '' }}" placeholder="—">
+                  </td>
+                  <td class="text-center">
+                    <div class="form-check d-flex justify-content-center mb-0">
+                      <input class="form-check-input" type="checkbox" name="is_active"
+                             {% if row.is_active %}checked{% endif %}>
+                    </div>
+                  </td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end gap-2">
+                      <button type="submit" class="btn-uh-outline btn btn-sm">
+                        <i class="bi bi-floppy me-1"></i>Save
+                      </button>
+                </form>
+                      <form method="post" action="/url-monitoring/{{ row.id }}/delete"
+                            onsubmit="return confirm('Delete this URL?')">
+                        <button type="submit" class="btn-uh-danger btn btn-sm">
+                          <i class="bi bi-trash3"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-link-45deg" style="font-size:2.5rem;opacity:0.2"></i>
+            <p class="mt-2 mb-0 small">No URLs added yet. Use the form to add your first endpoint.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Latest execution results #}
+    <div class="card panel mb-4">
+      <div class="card-body p-4">
+        <p class="card-title"><i class="bi bi-clipboard2-pulse me-1"></i>Latest Execution Results</p>
+        {% if latest_report and latest_report.execution_details %}
+          <div class="table-responsive">
+            <table class="uh-table table table-borderless mb-0">
+              <thead>
+                <tr>
+                  <th style="width:40%">URL</th>
+                  <th class="text-center" style="width:15%">Status</th>
+                  <th class="text-center" style="width:12%">HTTP</th>
+                  <th class="text-center" style="width:15%">Response</th>
+                  <th style="width:18%">Error</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for d in latest_report.execution_details %}
+                <tr>
+                  <td class="text-truncate" style="max-width:200px" title="{{ d.url }}">
+                    <a href="{{ d.url }}" target="_blank" rel="noopener"
+                       class="text-dark text-decoration-none small">
+                      <i class="bi bi-box-arrow-up-right me-1 text-secondary" style="font-size:0.7rem"></i>{{ d.url }}
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    {% set s = d.status | upper %}
+                    {% if s == 'UP' %}
+                      <span class="uh-badge badge-up"><i class="bi bi-check-circle me-1"></i>UP</span>
+                    {% elif s == 'DOWN' %}
+                      <span class="uh-badge badge-down"><i class="bi bi-x-circle me-1"></i>DOWN</span>
+                    {% else %}
+                      <span class="uh-badge badge-unknown">{{ d.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center small fw-medium">
+                    {% if d.http_status_code %}
+                      <span class="{% if d.http_status_code >= 400 %}text-danger{% elif d.http_status_code >= 200 %}text-dark{% endif %}">
+                        {{ d.http_status_code }}
+                      </span>
+                    {% else %}—{% endif %}
+                  </td>
+                  <td class="text-center small">{{ d.response_time_ms }} ms</td>
+                  <td class="small text-danger text-truncate" style="max-width:140px"
+                      title="{{ d.error_message or '' }}">
+                    {{ d.error_message or '' }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-clipboard2-pulse" style="font-size:2.5rem;opacity:0.2"></i>
+            <p class="mt-2 mb-0 small">No execution results yet. Click <strong>Run Health Checks</strong> to start.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Execution history log #}
+    <div class="card panel">
+      <div class="card-body p-4">
+        <p class="card-title"><i class="bi bi-clock-history me-1"></i>Execution History</p>
+        {% if history %}
+          <div class="table-responsive">
+            <table class="uh-table table table-borderless mb-0">
+              <thead>
+                <tr>
+                  <th style="width:8%">#</th>
+                  <th style="width:22%">Overall Status</th>
+                  <th class="text-center" style="width:15%">Total</th>
+                  <th class="text-center" style="width:15%">Success</th>
+                  <th class="text-center" style="width:15%">Failed</th>
+                  <th style="width:25%">Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in history %}
+                <tr>
+                  <td class="text-secondary small">{{ row.id }}</td>
+                  <td>
+                    {% set st = row.overall_status | upper %}
+                    {% if st == 'SUCCESS' %}
+                      <span class="uh-badge badge-up">{{ row.overall_status }}</span>
+                    {% elif st == 'FAILED' %}
+                      <span class="uh-badge badge-down">{{ row.overall_status }}</span>
+                    {% else %}
+                      <span class="uh-badge badge-partial">{{ row.overall_status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center small">{{ row.total_urls }}</td>
+                  <td class="text-center small fw-medium text-dark">{{ row.success_urls }}</td>
+                  <td class="text-center small {% if row.failed_urls > 0 %}text-danger fw-medium{% endif %}">
+                    {{ row.failed_urls }}
+                  </td>
+                  <td class="small text-secondary">{{ row.total_duration_ms }} ms</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-secondary">
+            <p class="mb-0 small">No execution history yet.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>{# /right col #}
+</div>
+{% endblock %}
