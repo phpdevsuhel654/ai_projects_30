@@ -107,8 +107,20 @@ Open in browser:
 http://localhost:5000/dashboard
 http://localhost:5000/cron-jobs
 http://localhost:5000/history
+http://localhost:5000/history-cleanup
 http://localhost:5000/reports
 ```
+
+## History Cleanup (Web UI)
+
+Use the History Cleanup page to move old records from `execution_logs` to `execution_logs_archive`.
+
+Retention options:
+
+- Archive 15 days old records
+- Archive 1 month old record (default)
+- Archive 3 months old records
+- Archive 6 months old records
 
 ## API Auth Header Examples (when enabled)
 

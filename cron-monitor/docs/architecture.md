@@ -26,3 +26,12 @@
 3. Execution service invokes URL using requests with timeout.
 4. Each run result is persisted in `execution_logs`.
 5. Dashboard and reports aggregate logs by period.
+
+## History Retention Flow
+
+1. User opens `/history-cleanup` from the web menu.
+2. User selects a retention option (15 days, 1 month, 3 months, 6 months).
+3. System selects rows older than the calculated cutoff from `execution_logs`.
+4. Matching rows are inserted into `execution_logs_archive`.
+5. Archived rows are removed from `execution_logs`.
+6. UI shows archived row count after completion.

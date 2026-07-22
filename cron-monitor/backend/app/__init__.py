@@ -8,7 +8,7 @@ from app.controllers.health_controller import health_bp
 from app.controllers.cron_controller import cron_bp
 from app.controllers.execution_controller import execution_bp
 from app.controllers.web_controller import web_bp
-from app.models import CronJob, ExecutionLog
+from app.models import CronJob, ExecutionLog, ExecutionLogArchive
 from app.scheduler.job_scheduler import job_scheduler
 from app.utils.extensions import db, migrate
 from app.utils.security import register_security_headers
@@ -53,7 +53,7 @@ def create_app(config_overrides: dict | None = None) -> Flask:
     app.register_blueprint(execution_bp, url_prefix="/api")
 
     with app.app_context():
-        _ = (CronJob, ExecutionLog)
+        _ = (CronJob, ExecutionLog, ExecutionLogArchive)
         db.create_all()
         _ensure_sqlite_compatibility_migrations(app)
 

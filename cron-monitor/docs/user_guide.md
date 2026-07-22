@@ -8,6 +8,7 @@ You can:
 - Add, edit, enable, disable, and delete cron jobs.
 - Run one cron job or run all active jobs in bulk.
 - Track execution history with filters.
+- Archive old execution history records by retention period.
 - View daily/weekly/monthly reports.
 - Identify failed runs and response details quickly.
 
@@ -17,7 +18,8 @@ You can:
 2. Set execution count and schedule type.
 3. Run jobs manually (single or all active).
 4. Review execution history and response output.
-5. Analyze reports for success/failure trends.
+5. Archive old history records from History Cleanup when needed.
+6. Analyze reports for success/failure trends.
 
 ## 3. Pages and their purpose
 
@@ -49,8 +51,17 @@ You can:
   - Status and status code
   - Response time
   - Response body (if available)
-  - Error message (if any)
   - Executed timestamp
+
+### History Cleanup
+- Open the page from top menu: `/history-cleanup`.
+- Select archive retention window:
+  - Archive 15 days old records
+  - Archive 1 month old record (default)
+  - Archive 3 months old records
+  - Archive 6 months old records
+- Click Archive Records to move matching rows to archive table.
+- Archived records are removed from active history table after move.
 
 ### Reports
 - View period-based reports (daily/weekly/monthly).
@@ -118,3 +129,4 @@ For failures, check:
 - Cron Jobs: `/cron-jobs`
 - Execution History: `/history`
 - Reports: `/reports`
+- History Cleanup: `/history-cleanup`

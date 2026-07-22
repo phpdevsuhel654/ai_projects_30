@@ -34,11 +34,11 @@
         </select>
       </div>
       <div class="col-12 col-md-1">
-        <label for="start_at" class="form-label">Execution Start</label>
+        <label for="start_at" class="form-label">Start</label>
         <input id="start_at" name="start_at" type="datetime-local" class="form-control" value="{{ selected_start_at_local }}" />
       </div>
       <div class="col-12 col-md-1">
-        <label for="end_at" class="form-label">Execution End</label>
+        <label for="end_at" class="form-label">End</label>
         <input id="end_at" name="end_at" type="datetime-local" class="form-control" value="{{ selected_end_at_local }}" />
       </div>
       <div class="col-12 col-md-1">
@@ -70,7 +70,6 @@
             <th>Status Code</th>
             <th>Response Time</th>
             <th>Response</th>
-            <th>Error</th>
             <th>Executed At</th>
           </tr>
         </thead>
@@ -92,13 +91,12 @@
                 <td>{{ log.status_code or '-' }}</td>
                 <td>{{ "%.3f"|format(log.response_time or 0) }}s</td>
                 <td class="text-break small response-cell">{{ log.response_body or '-' }}</td>
-                <td class="text-break small">{{ log.error_message or '-' }}</td>
                 <td class="small">{{ log.executed_at }}</td>
               </tr>
             {% endfor %}
           {% else %}
             <tr>
-              <td colspan="10" class="text-center text-muted py-4">No logs available.</td>
+              <td colspan="9" class="text-center text-muted py-4">No logs available.</td>
             </tr>
           {% endif %}
         </tbody>

@@ -1,5 +1,8 @@
 import secrets
+import shutil
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from urllib.parse import urlparse
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 
@@ -11,6 +14,14 @@ from app.utils.security import web_login_required
 from app.utils.validators import validate_schedule
 
 web_bp = Blueprint("web", __name__)
+
+HISTORY_CLEANUP_OPTIONS = {
+    "15d": {"label": "Archive 15 days old records", "delta": timedelta(days=15)},
+    "1m": {"label": "Archive 1 month old record", "delta": timedelta(days=30)},
+    "3m": {"label": "Archive 3 months old records", "delta": timedelta(days=90)},
+    "6m": {"label": "Archive 6 months old records", "delta": timedelta(days=180)},
+}
+DEFAULT_HISTORY_CLEANUP_OPTION = "1m"
 
 
 def _parse_datetime_input(value: str | None) -> datetime | None:
@@ -237,6 +248,41 @@ def run_all_page():
     return redirect(url_for("web.dashboard_page"))
 
 
+@web_bp.post("/backup-database")
+@web_login_required
+def backup_database():
+    try:
+        from app.config.settings import Config
+        
+        db_uri = current_app.config.get("SQLALCHEMY_DATABASE_URI", "")
+        
+        if not db_uri.startswith("sqlite:"):
+            flash("Database backup is only supported for SQLite databases.", "danger")
+            return redirect(url_for("web.dashboard_page"))
+        
+        # Get the database path from config
+        base_dir = Path(current_app.config.get("BASE_DIR", Path(__file__).resolve().parents[2]))
+        db_path = base_dir / "database" / "cron_monitor.db"
+        
+        if not db_path.exists():
+            flash(f"Database file not found at {db_path}.", "danger")
+            return redirect(url_for("web.dashboard_page"))
+        
+        backup_dir = db_path.parent / "backups"
+        backup_dir.mkdir(exist_ok=True)
+        
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        backup_path = backup_dir / f"cron_monitor_backup_{timestamp}.db"
+        
+        shutil.copy2(db_path, backup_path)
+        
+        flash(f"Database backed up successfully to {backup_path.name}.", "success")
+    except Exception as e:
+        flash(f"Database backup failed: {str(e)}", "danger")
+    
+    return redirect(url_for("web.dashboard_page"))
+
+
 @web_bp.get("/history")
 @web_login_required
 def history_page():
@@ -259,7 +305,7 @@ def history_page():
         cron_job_id = None
 
     now_utc = datetime.now(timezone.utc)
-    default_start = now_utc - timedelta(days=1)
+    default_start = now_utc - timedelta(days=7)
     start_at = _parse_datetime_input(start_at_raw) or default_start
     end_at = _parse_datetime_input(end_at_raw) or now_utc
 
@@ -293,6 +339,37 @@ def history_page():
     )
 
 
+@web_bp.get("/history-cleanup")
+@web_login_required
+def history_cleanup_page():
+    retention = (request.args.get("retention") or DEFAULT_HISTORY_CLEANUP_OPTION).strip().lower()
+    if retention not in HISTORY_CLEANUP_OPTIONS:
+        retention = DEFAULT_HISTORY_CLEANUP_OPTION
+
+    return render_template(
+        "history_cleanup.html",
+        cleanup_options=HISTORY_CLEANUP_OPTIONS,
+        selected_retention=retention,
+        default_retention=DEFAULT_HISTORY_CLEANUP_OPTION,
+    )
+
+
+@web_bp.post("/history-cleanup")
+@web_login_required
+def history_cleanup_run():
+    retention = (request.form.get("retention") or DEFAULT_HISTORY_CLEANUP_OPTION).strip().lower()
+    if retention not in HISTORY_CLEANUP_OPTIONS:
+        flash("Invalid cleanup option selected.", "danger")
+        return redirect(url_for("web.history_cleanup_page"))
+
+    selected_option = HISTORY_CLEANUP_OPTIONS[retention]
+    cutoff = datetime.now(timezone.utc) - selected_option["delta"]
+    archived_count = ExecutionLogRepository.archive_executed_before(cutoff)
+
+    flash(f"Archived {archived_count} old execution history record(s).", "success")
+    return redirect(url_for("web.history_cleanup_page", retention=retention))
+
+
 @web_bp.get("/reports")
 @web_login_required
 def reports_page():
@@ -319,7 +396,7 @@ def reports_page():
     end_at_dt = _parse_datetime_input(end_at_raw)
     if period == "daily":
         now_utc = datetime.now(timezone.utc)
-        start_at_dt = start_at_dt or (now_utc - timedelta(days=1))
+        start_at_dt = start_at_dt or (now_utc - timedelta(days=7))
         end_at_dt = end_at_dt or now_utc
 
     if start_at_dt and end_at_dt and end_at_dt < start_at_dt:

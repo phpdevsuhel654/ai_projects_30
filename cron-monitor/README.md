@@ -15,7 +15,8 @@ Detailed architecture: `docs/architecture.md`
 ## 2) Database Design
 
 - `cron_jobs`: cron job definitions and schedule metadata
-- `execution_logs`: every execution attempt with response data and errors
+- `execution_logs`: active execution history with response data and errors
+- `execution_logs_archive`: archived execution history moved from `execution_logs` by retention rules
 
 Detailed schema: `docs/database_design.md`
 
@@ -144,6 +145,7 @@ Example custom schedule payload:
 	- `/dashboard`
 	- `/cron-jobs`
 	- `/history`
+	- `/history-cleanup`
 	- `/reports`
 - UI supports:
 	- Add cron jobs via form
@@ -152,6 +154,8 @@ Example custom schedule payload:
 	- Delete jobs
 	- Run all active jobs from dashboard
 	- View recent logs and report summaries
+	- Archive old history records by retention window (15 days, 1 month, 3 months, 6 months)
+	- Default retention selection: 1 month
 
 ## Phase 4 Additions
 

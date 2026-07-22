@@ -26,6 +26,7 @@
 - Bootstrap dashboard cards and tables.
 - Cron management forms and execution controls.
 - History listing with quick row limit filters.
+- History cleanup page with retention-based archive move to archive table.
 
 ## Phase 4: Advanced Reporting (completed)
 

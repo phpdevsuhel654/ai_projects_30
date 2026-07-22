@@ -19,7 +19,10 @@
   <body>
     <nav class="navbar navbar-expand-lg app-nav sticky-top">
       <div class="container-fluid px-4">
-        <a class="navbar-brand fw-bold" href="{{ url_for('web.dashboard_page') }}">Cron Monitor</a>
+        <a class="navbar-brand fw-bold" href="{{ url_for('web.dashboard_page') }}">
+          <img src="{{ url_for('static', filename='css/logo.svg') }}" alt="Cron Monitor Logo" class="me-2" />
+          Cron Monitor
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -36,6 +39,7 @@
             <li class="nav-item"><a class="nav-link" href="{{ url_for('web.dashboard_page') }}">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('web.cron_jobs_page') }}">Cron Jobs</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('web.history_page') }}">History</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('web.history_cleanup_page') }}">History Cleanup</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('web.reports_page') }}">Reports</a></li>
             {% if config.get('WEB_AUTH_ENABLED') and session.get('web_user_authenticated') %}
               <li class="nav-item">
