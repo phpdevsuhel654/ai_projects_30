@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Address Validation | Utility Hub{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1 fw-bold">Address Validation</h1>
+    <p class="text-muted mb-0">Validate and normalize postal addresses using Nominatim.</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Validate Address</h2>
+        <form method="post" action="{{ url_for('address_web.address_validation_page') }}">
+          <label class="form-label">Address JSON</label>
+          <textarea class="form-control font-monospace" name="address_json" rows="12" required placeholder='{
+  "BuildingName": "Bastia Hill",
+  "StreetAddress": "22 Bastia Avenue",
+  "Suburb": "BASTIA HILL",
+  "City": "WHANGANUI",
+  "PostCode": "4500",
+  "CountryCode": "NZ"
+}'>{{ address_json_input }}</textarea>
+          <div class="form-text mb-3">Required: <code>StreetAddress</code>, <code>City</code>, <code>CountryCode</code></div>
+          <button type="submit" class="btn btn-primary w-100">Validate Address</button>
+        </form>
+
+        {% if error %}
+          <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if result %}
+      <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body">
+          <h2 class="h5 fw-bold mb-3">Validation Result</h2>
+          <div class="mb-2"><strong>Status:</strong> {{ result.validation_status }}</div>
+          <div class="mb-2"><strong>Confidence:</strong> {{ "%.0f"|format(result.confidence_score * 100) }}%</div>
+          <div class="mb-3"><strong>Validated At:</strong> {{ result.validation_timestamp }}</div>
+          <label class="form-label">Corrected Address</label>
+          <pre class="p-3 bg-light border rounded small mb-0">{{ corrected_json_output }}</pre>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Validation History</h2>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Validation #</th>
+                <th>Status</th>
+                <th>Confidence %</th>
+                <th>Original Address</th>
+                <th>Corrected Address</th>
+                <th>Validated At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if history %}
+                {% for item in history %}
+                  <tr>
+                    <td>{{ item.id }}</td>
+                    <td>
+                      {% if item.validation_status == 'VALID' %}
+                        <span class="badge text-bg-success">Success</span>
+                      {% elif item.validation_status == 'PARTIAL' %}
+                        <span class="badge text-bg-warning">Partial</span>
+                      {% elif item.validation_status in ['INVALID', 'ERROR'] %}
+                        <span class="badge text-bg-danger">Failure</span>
+                      {% else %}
+                        <span class="badge text-bg-secondary">{{ item.validation_status }}</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ "%.0f"|format(item.confidence_score * 100) }}%</td>
+                    <td class="text-break">{{ item.original_address.StreetAddress or '-' }}, {{ item.original_address.City or '-' }}</td>
+                    <td class="text-break">{{ item.corrected_address.StreetAddress or '-' }}, {{ item.corrected_address.City or '-' }}</td>
+                    <td>{{ item.validation_timestamp or '-' }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">No validation history yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

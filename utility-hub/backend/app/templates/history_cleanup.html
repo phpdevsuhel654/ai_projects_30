@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}History Cleanup | Utility Hub{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+  <div>
+    <h1 class="h4 fw-bold mb-1">Execution History Cleanup</h1>
+    <p class="text-muted mb-0">Move old records from execution history to archive table.</p>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <form method="post" action="{{ url_for('web.history_cleanup_run') }}" class="row g-3 align-items-end">
+      <div class="col-12 col-md-6 col-lg-4">
+        <label for="retention" class="form-label">Cleanup Option</label>
+        <select id="retention" name="retention" class="form-select">
+          {% for key, option in cleanup_options.items() %}
+            <option value="{{ key }}" {% if selected_retention == key %}selected{% endif %}>{{ option.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3 d-grid">
+        <button class="btn btn-warning" type="submit" onclick="return confirm('This will move matching execution history records to the archive table. Continue?');">
+          Archive Records
+        </button>
+      </div>
+    </form>
+    <p class="small text-muted mt-3 mb-0">
+      Default selection: Archive 1 month old record.
+    </p>
+  </div>
+</div>
+{% endblock %}

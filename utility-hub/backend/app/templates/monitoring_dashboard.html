@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}URL Monitoring | Utility Hub{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+  <div>
+    <h1 class="h3 mb-1 fw-bold">URL Monitoring</h1>
+    <p class="text-muted mb-0">Manage monitored endpoints, run checks, and review execution history.</p>
+  </div>
+  <form method="post" action="{{ url_for('monitoring_web.execute_checks_ui') }}">
+    <input type="hidden" name="initiated_by" value="web-ui" />
+    <button type="submit" class="btn btn-primary">Run Health Checks</button>
+  </form>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-label">Total URLs</div>
+      <div class="stat-value">{{ cards.total_urls }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-label">Active URLs</div>
+      <div class="stat-value">{{ cards.active_urls }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-label">Failed URLs</div>
+      <div class="stat-value">{{ cards.failed_urls }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-label">Last Execution</div>
+      <div class="stat-value" style="font-size: 1rem;">{{ cards.last_execution_time or '-' }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Add URL</h2>
+        <form method="post" action="{{ url_for('monitoring_web.add_url_ui') }}">
+          <div class="mb-3">
+            <label class="form-label">URL</label>
+            <input type="url" name="url" class="form-control" placeholder="https://example.com" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <input type="text" name="notes" class="form-control" placeholder="Optional description">
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked>
+            <label class="form-check-label" for="is_active">Active immediately</label>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Add URL</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Scheduler Status</h2>
+        <div class="small"><strong>Configured:</strong> {{ 'Yes' if scheduler_status.configured else 'No' }}</div>
+        <div class="small"><strong>Running:</strong> {{ 'Yes' if scheduler_status.running else 'No' }}</div>
+        <div class="small"><strong>Cron:</strong> {{ scheduler_status.cron or '-' }}</div>
+        <div class="small"><strong>Timezone:</strong> {{ scheduler_status.timezone or '-' }}</div>
+        <div class="small"><strong>Next Run:</strong> {{ scheduler_status.next_run_time or '-' }}</div>
+        {% if scheduler_status.last_error %}
+          <div class="alert alert-warning mt-3 mb-0 py-2">{{ scheduler_status.last_error }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Monitored URLs</h2>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>URL</th>
+                <th>Notes</th>
+                <th>Active</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if urls %}
+                {% for row in urls %}
+                  <tr>
+                    <form method="post" action="{{ url_for('monitoring_web.update_url_ui', url_id=row.id) }}">
+                      <td><input type="url" name="url" class="form-control form-control-sm" value="{{ row.url }}" required></td>
+                      <td><input type="text" name="notes" class="form-control form-control-sm" value="{{ row.notes or '' }}"></td>
+                      <td><input class="form-check-input" type="checkbox" name="is_active" {% if row.is_active %}checked{% endif %}></td>
+                      <td class="text-end">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Save</button>
+                    </form>
+                        <form method="post" action="{{ url_for('monitoring_web.delete_url_ui', url_id=row.id) }}" style="display:inline" onsubmit="return confirm('Delete this URL?')">
+                          <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                        </form>
+                      </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-4">No URLs added yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Latest Execution Results</h2>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>URL</th>
+                <th>Status</th>
+                <th>HTTP Status</th>
+                <th>Response Time (ms)</th>
+                <th>Checked At</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if latest_report and latest_report.execution_details %}
+                {% for d in latest_report.execution_details %}
+                  <tr>
+                    <td class="text-break"><a href="{{ d.url }}" target="_blank" rel="noopener">{{ d.url }}</a></td>
+                    <td>
+                      {% if d.status == 'UP' %}
+                        <span class="badge text-bg-success">Success</span>
+                      {% else %}
+                        <span class="badge text-bg-danger">Failure</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ d.http_status_code or '-' }}</td>
+                    <td>{{ d.response_time_ms or '-' }}</td>
+                    <td>{{ d.checked_at or '-' }}</td>
+                    <td class="text-danger">{{ d.error_message or '-' }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">No execution results yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Execution History</h2>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Execution #</th>
+                <th>Status</th>
+                <th>Total URLs</th>
+                <th>Success</th>
+                <th>Failure</th>
+                <th>Duration (ms)</th>
+                <th>Executed At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if history %}
+                {% for row in history %}
+                  <tr>
+                    <td>{{ row.id }}</td>
+                    <td>
+                      {% if row.overall_status == 'SUCCESS' %}
+                        <span class="badge text-bg-success">Success</span>
+                      {% elif row.overall_status == 'PARTIAL' %}
+                        <span class="badge text-bg-warning">Partial</span>
+                      {% else %}
+                        <span class="badge text-bg-danger">Failure</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ row.total_urls }}</td>
+                    <td>{{ row.success_urls }}</td>
+                    <td>{{ row.failed_urls }}</td>
+                    <td>{{ row.total_duration_ms }}</td>
+                    <td>{{ row.last_execution_time or '-' }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="7" class="text-center text-muted py-4">No execution history yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

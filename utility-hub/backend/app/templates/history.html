@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}History | Utility Hub{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+  <div>
+    <h1 class="h4 fw-bold mb-1">Execution History</h1>
+    <p class="text-muted mb-0">Review latest execution logs.</p>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-12 col-md-3">
+        <label for="cron_job_id" class="form-label">Job Name</label>
+        <select id="cron_job_id" name="cron_job_id" class="form-select">
+          <option value="">All Jobs</option>
+          {% for job in jobs %}
+            <option value="{{ job.id }}" {% if selected_cron_job_id == job.id %}selected{% endif %}>{{ job.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-3">
+        <label for="bulk_execution_id" class="form-label">Bulk Execution ID</label>
+        <input id="bulk_execution_id" name="bulk_execution_id" class="form-control" value="{{ selected_bulk_execution_id or '' }}" placeholder="bulk-..." />
+      </div>
+      <div class="col-12 col-md-2">
+        <label for="status" class="form-label">Status</label>
+        <select id="status" name="status" class="form-select">
+          <option value="" {% if not selected_status %}selected{% endif %}>All</option>
+          <option value="success" {% if selected_status == 'success' %}selected{% endif %}>Success</option>
+          <option value="failure" {% if selected_status == 'failure' %}selected{% endif %}>Failure</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-1">
+        <label for="start_at" class="form-label">Start</label>
+        <input id="start_at" name="start_at" type="datetime-local" class="form-control" value="{{ selected_start_at_local }}" />
+      </div>
+      <div class="col-12 col-md-1">
+        <label for="end_at" class="form-label">End</label>
+        <input id="end_at" name="end_at" type="datetime-local" class="form-control" value="{{ selected_end_at_local }}" />
+      </div>
+      <div class="col-12 col-md-1">
+        <label for="limit" class="form-label">Rows</label>
+        <select id="limit" name="limit" class="form-select">
+          {% for option in [25, 50, 100, 200, 500] %}
+            <option value="{{ option }}" {% if selected_limit == option %}selected{% endif %}>{{ option }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-1 d-grid">
+        <button class="btn btn-primary" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Bulk Execution ID</th>
+            <th>Job Name</th>
+            <th>Exec #</th>
+            <th>Status</th>
+            <th>Status Code</th>
+            <th>Response Time</th>
+            <th>Response</th>
+            <th>Executed At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if logs %}
+            {% for log in logs %}
+              <tr>
+                <td>{{ log.id }}</td>
+                <td class="small text-break">{{ log.bulk_execution_id or '-' }}</td>
+                <td>{{ log.cron_job_name or ('Job #' ~ log.cron_job_id) }}</td>
+                <td>{{ log.execution_no }}</td>
+                <td>
+                  {% if log.status == 'success' %}
+                    <span class="badge text-bg-success">Success</span>
+                  {% else %}
+                    <span class="badge text-bg-danger">Failure</span>
+                  {% endif %}
+                </td>
+                <td>{{ log.status_code or '-' }}</td>
+                <td>{{ "%.3f"|format(log.response_time or 0) }}s</td>
+                <td class="text-break small response-cell">{{ log.response_body or '-' }}</td>
+                <td class="small">{{ log.executed_at }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="9" class="text-center text-muted py-4">No logs available.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

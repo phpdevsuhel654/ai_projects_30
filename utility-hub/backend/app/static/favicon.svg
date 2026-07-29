@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512"
+     height="512"
+     viewBox="0 0 512 512">
+
+  <defs>
+    <linearGradient id="tealGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#0F9D8A"/>
+    </linearGradient>
+
+    <style>
+      .navy { fill:#0B2A59; }
+      .teal { fill:url(#tealGradient); }
+      .white { fill:#FFFFFF; }
+      .gear { fill:#0B2A59; }
+      .blue { fill:#1E88E5; }
+      .orange { fill:#F59E0B; }
+      .stroke { stroke:#FFFFFF; stroke-width:2; fill:none; }
+    </style>
+  </defs>
+
+  <!-- Left U -->
+  <path class="navy"
+        d="M110 70
+           C110 70 180 70 180 70
+           L180 290
+           C180 360 230 405 256 420
+           C205 410 110 355 110 280 Z"/>
+
+  <!-- Right U -->
+  <path class="teal"
+        d="M402 70
+           L402 360
+           C402 395 375 420 330 435
+           C350 420 360 405 360 385
+           L360 70 Z"/>
+
+  <!-- Bottom curve -->
+  <path class="teal"
+        d="M180 285
+           C215 345 295 345 330 285
+           L360 395
+           C320 435 190 435 150 395 Z"/>
+
+  <!-- White icon strip -->
+  <rect x="315" y="90" width="65" height="280" rx="28" class="white"/>
+
+  <!-- Globe -->
+  <circle cx="347" cy="120" r="18" fill="none" stroke="#14B8A6" stroke-width="3"/>
+  <ellipse cx="347" cy="120" rx="8" ry="18" fill="none" stroke="#14B8A6" stroke-width="2"/>
+  <line x1="329" y1="120" x2="365" y2="120" stroke="#14B8A6" stroke-width="2"/>
+  <line x1="333" y1="112" x2="361" y2="112" stroke="#14B8A6" stroke-width="2"/>
+  <line x1="333" y1="128" x2="361" y2="128" stroke="#14B8A6" stroke-width="2"/>
+
+  <!-- Gear -->
+  <g transform="translate(347,190)">
+    <circle r="14" class="gear"/>
+    <circle r="6" fill="white"/>
+    <rect x="-2" y="-22" width="4" height="8" class="gear"/>
+    <rect x="-2" y="14" width="4" height="8" class="gear"/>
+    <rect x="-22" y="-2" width="8" height="4" class="gear"/>
+    <rect x="14" y="-2" width="8" height="4" class="gear"/>
+    <rect x="-16" y="-16" width="5" height="5" transform="rotate(45)" class="gear"/>
+    <rect x="-16" y="-16" width="5" height="5" transform="rotate(-45)" class="gear"/>
+  </g>
+
+  <!-- Water Drop -->
+  <path class="blue"
+        d="M347 235
+           C335 250 327 260 327 272
+           C327 286 337 296 347 296
+           C357 296 367 286 367 272
+           C367 260 359 250 347 235 Z"/>
+
+  <!-- Plug -->
+  <g transform="translate(347,350)">
+    <rect x="-10" y="-12" width="20" height="26" rx="4" class="orange"/>
+    <rect x="-7" y="-24" width="4" height="12" class="orange"/>
+    <rect x="3" y="-24" width="4" height="12" class="orange"/>
+    <rect x="-2" y="14" width="4" height="10" class="orange"/>
+    <polygon points="-2,-2 5,-2 0,8 6,8 -5,22 -1,10 -7,10"
+             fill="white"/>
+  </g>
+
+</svg>

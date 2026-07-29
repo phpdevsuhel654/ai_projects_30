@@ -1,0 +1,15 @@
+I want to create an application in python that have the following requirement,
+
+Every day I am checking cronjob URL from my end. 
+There are no of cron job URLs, sometimes I need to run the same cron job URL multiple time.
+I want to create a system that will do the job for me and give me the final report.
+The system will do the following things
+	- Run cron job URL and give the response
+	- After completing URL run process it will give me the full report
+	- I need some URL need to run multiple times
+	- I will provide list of URLs and no of time it need to call.
+		- URL like https://web7.omnirps.com/cron/cron_delete_and_archive_log_table_data/return_order
+	- Use python and flask for the same.
+	- Use sqlite as database.
+	- Use minimal tokens
+	- Use best architechture
