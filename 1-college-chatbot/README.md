@@ -466,8 +466,3 @@ Finalize the learning project with operational documentation and release readine
 ### Outcome
 - The project now has end-to-end implementation, testing, CI checks, deployment files, and release docs.
 - Suitable as a complete learning reference from planning to deployment.
-
-### User information
-
-Username: phpdev.suhel654@gmail.com
-Password: phpdev
